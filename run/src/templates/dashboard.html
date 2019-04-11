@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+</head>
+
+<h1>Welcome to Fake Twitter!</h1>
+<h2>You are logged in via the email: {{username}}</h2>
+
+
+<nav class="navbar navbar-light bg-light">
+  <form action='/dashboard' method="post" class="form-inline">
+    <input name="new_tweet" class="form-control mr-sm-10" type="text" placeholder="Speak yo mind here" aria-label="Tweet your latest thoughts">
+    <button class="btn btn-outline-success my-10 my-sm-0" type="submit">Send that Tweet</button>
+  </form>
+</nav>
+<div class="col">
+<div class="row">
+  <div class="col-md-4">
+    <table class="table table-striped" id="owned_stock_table">
+      <thead>
+        <tr>
+          <th>User</th>
+          <th>Tweet</th>
+          <th>Tweet Time</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for tweet in alltweets %}
+        <tr>
+          <td>{{ tweet.account_pk }}</td>
+          <td>{{ tweet.tweet_text }}</td>
+          <td>{{ tweet.time }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="row">
+        <div class="col-md-4">
+        <h3><a href="{{url_for('logout')}}">Logout</a>
+                    </h3>
+</div>
+</div>
+</div>
+</html>

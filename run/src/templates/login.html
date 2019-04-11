@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+</head>
+
+  <div class="container">
+    <h1>Welcome to Fake Twitter!</h1>
+    <div class="row">
+        
+        <div class="col-8">
+            <h3>If you have an account please login...or please <a href="{{url_for('signup')}}">create a new account</a>
+                here</h3>
+            <div class="form-group">
+                <form action="/" method="post" class="form-group">
+                <label for="InputEmail">Email address</label>
+                <input name="email_login" type="email" class="form-control" id="InputEmail" placeholder="Enter email">
+            </div>
+            
+            <div class="form-group">
+            <label for="InputPassword">Password</label>
+            <input name="password_login" type="password" class="form-control" id="exampleInputPassword1" placeholder="Password">
+            </div>
+                <button name="login" type="submit" class="btn btn-primary" value="login">Login</button>
+                </form>
+            <h3>{{error}}</h3>
+        </div>
+        </form>
+        
+        
+    </div>
+<div class="col">
+<div class="row">
+  <div class="col-md-4">
+    <table class="table table-striped" id="owned_stock_table">
+      <thead>
+        <tr>
+          <th>User</th>
+          <th>Tweet</th>
+          <th>Tweet Time</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for tweet in alltweets %}
+        <tr>
+          <td>{{ tweet.account_pk }}</td>
+          <td>{{ tweet.tweet_text }}</td>
+          <td>{{ tweet.time }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+</div>
+</html>
+
+

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+</head>
+
+  <div class="container">
+    <h1>Welcome to Fake Twitter!</h1>
+    <div class="row">
+        <div class="col">
+            <h3>Sign up here to create a new account or <a href="{{url_for('login')}}">return to the login screen</a></h3>
+            <div class="form-group">
+                <form action="/signup" method="post" class="form-signin">
+                <label for="InputEmail">Email address</label>
+                <input name="email_signup" type="email" class="form-control" id="InputEmail"  placeholder="Enter email">
+            </div>
+            
+            <div class="form-group">
+            <label for="exampleInputPassword1">Password</label>
+            <input name="password_signup" type="password" class="form-control" id="exampleInputPassword1" placeholder="Password">
+            </div>
+                <div class="form-group">
+                <label for="exampleInputPassword1">Confirm Password</label>
+                <input name="password_signup_confirm" type="password" class="form-control" id="exampleInputPassword1" placeholder="Confirm Password">
+                </div>
+
+                <button name="signup" type="submit" class="btn btn-primary" value="signup">Signup</button>
+                </form>
+                <h3>{{error2}}</h3>
+            </div>
+    </div>
+</div>
+</html>
+
+
