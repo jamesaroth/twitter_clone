@@ -1,10 +1,12 @@
+import sqlite3
+import os
+from datetime import datetime
 import time
+
 from .orm import ORM
 from .util import hash_pass
-from .tweet import Tweet
-from .hashtag import Hashtag
-from datetime import datetime
-import sqlite3
+# from .tweet import Tweet
+# from .hashtag import Hashtag
 
 class Account(ORM):
     fields = ["username", "password_hash"]
@@ -17,12 +19,6 @@ class Account(ORM):
 
     def set_password(self, password):
         self.password_hash = hash_pass(password)
-    
-    def create_account(self, username, password_hash):
-        account = Account()
-        self.username = username
-        self.password_hash = password_hash
-        account.save()
 
     @classmethod
     def login(cls, username, password):
@@ -31,6 +27,7 @@ class Account(ORM):
             return None
         else:    
             return account
+    
     @classmethod
     def verify(cls, username, password):
         account = cls.select_one("WHERE password_hash = ? AND username = ?", (hash_pass(password), username))
@@ -39,33 +36,10 @@ class Account(ORM):
         else:    
             return account
     
-    # SELECT username FROM accounts WHERE accounts.pk = tweets.account_pk
-
-#TODO
-    
-    def make_tweet(self, text):
-        if len(text) > 280:
-            return ValueError
-        tweet = Tweet()
-        tweet.account_pk = self.pk
-        tweet.tweet_text = text
-        tweet.time = time.time()
-        tweet.save()
-        return tweet
-
-    def get_all_tweets(self):
-        """ return a list of all Tweets in chronological order for all users"""
-        return Tweet.select_all_tweets()
-    
-    def get_tweets(self, pk):
-        """ return a list of each Tweet object for this user """
-        where = "WHERE account_pk = ?"
-        values = (pk, )
-        return Tweet.select_many(where, values)
-    
-    def get_usernames(self, pk):
-        
-        pass
+    # def get_tweets_with_users(self):
+    #     return Tweet.select_all_users_from_tweets()
+   
+   
 
     # def get_tweets_for_hashtag(self, hashtag):
     #     """ return a list of all tweets for a given hashtag for this user """
@@ -104,3 +78,14 @@ class Account(ORM):
     #     self.save()
     #     trade.save()
     #     position.save()
+# def select_all_users_from_tweets():
+#         """ provide a WHERE clause to a SELECT statement and return objects
+#         representing each matched row """
+#         with sqlite3.connect(os.path.join(os.path.dirname(__file__), 'twitterproj.db')) as conn:
+#             conn.row_factory = sqlite3.Row
+#             cur = conn.cursor()
+#             SQLPATTERN = "SELECT accounts.username, tweets.tweet_text, tweets.time FROM tweets INNER JOIN accounts ON accounts.pk=tweets.account_pk ORDER BY time DESC;"
+#             SQL = SQLPATTERN
+#             cur.execute(SQL)
+#             return cur.fetchall()
+

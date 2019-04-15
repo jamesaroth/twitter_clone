@@ -26,10 +26,14 @@ def create_db(dbfilename=DBFILENAME):
         SQL = """
         CREATE TABLE tweets (
             pk INTEGER PRIMARY KEY AUTOINCREMENT,
-            account_pk INTEGER, 
+            account_pk INTEGER,
+            username VARCHAR(280), 
             tweet_text VARCHAR(280),
             time FLOAT,
-            FOREIGN KEY(account_pk) REFERENCES accounts(pk)
+            retweet_count INTEGER,
+            likes INTEGER,
+            FOREIGN KEY(account_pk) REFERENCES accounts(pk),
+            FOREIGN KEY(username) REFERENCES accounts(username)
         ); """
         cur.execute(SQL)
 

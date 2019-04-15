@@ -1,6 +1,6 @@
-from .controllers.account import Account
-from .controllers.tweet import Tweet
-from .controllers.hashtag import Hashtag
+# from .controllers.account import Account
+# from .controllers.tweet import Tweet
+# from .controllers.hashtag import Hashtag
 
 from flask import Flask, session
 app = Flask(__name__)

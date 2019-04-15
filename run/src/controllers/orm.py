@@ -45,7 +45,7 @@ class ORM:
 
             cur.execute(SQL, values)
             """ cur.lastrowid = pk that was created in the most recent insert """
-            
+            conn.commit()
             self.pk = cur.lastrowid
             
 
@@ -65,6 +65,7 @@ class ORM:
             values = (*self._field_value_list(), self.pk)
             
             cur.execute(SQL, values)
+            conn.commit()
 
     def delete(self):
         """ remove the row corresponding to this object from the table """
@@ -76,6 +77,7 @@ class ORM:
             SQLPATTERN = "DELETE FROM {table} WHERE pk = ?;"
             SQL = SQLPATTERN.format(table=self.table)
             cur.execute(SQL, (self.pk, ))
+            conn.commit()
 
     @classmethod
     def _from_row(cls, row):
@@ -90,15 +92,16 @@ class ORM:
         return new_obj
 
     @classmethod
-    def select_many(cls, where_clause="", values=tuple()):
+    def select_many(cls, where_clause="", order_clause="", values=tuple()):
         """ provide a WHERE clause to a SELECT statement and return objects
         representing each matched row """
         with sqlite3.connect(cls.database) as conn:
             conn.row_factory = sqlite3.Row
             cur = conn.cursor()
-            SQLPATTERN = "SELECT * FROM {table} {where_clause} ORDER BY time DESC;"
-            SQL = SQLPATTERN.format(table=cls.table, where_clause=where_clause)
+            SQLPATTERN = "SELECT * FROM {table} {where_clause} {order_clause};"
+            SQL = SQLPATTERN.format(table=cls.table, where_clause=where_clause, order_clause=order_clause)
             cur.execute(SQL, values)
+            conn.commit()
             result = []
             for row in cur.fetchall():
                 result.append(cls._from_row(row))
@@ -114,25 +117,13 @@ class ORM:
             SQLPATTERN = "SELECT * FROM {table} ORDER BY time DESC;"
             SQL = SQLPATTERN.format(table=cls.table, )
             cur.execute(SQL)
+            conn.commit()
             result = []
             for row in cur.fetchall():
                 result.append(cls._from_row(row))
             return result
 
-    @classmethod
-    def select_all_tweets_from_user(cls, where_clause="", values=tuple()):
-        """ provide a WHERE clause to a SELECT statement and return objects
-        representing each matched row """
-        with sqlite3.connect(cls.database) as conn:
-            conn.row_factory = sqlite3.Row
-            cur = conn.cursor()
-            SQLPATTERN = "SELECT * FROM {table} {where_clause} ORDER BY time DESC;"
-            SQL = SQLPATTERN.format(table=cls.table, where_clause=where_clause)
-            cur.execute(SQL, values)
-            result = []
-            for row in cur.fetchall():
-                result.append(cls._from_row(row))
-            return result
+# SELECT accounts.username, tweets.tweet_text, tweets.time FROM tweets INNER JOIN accounts ON accounts.pk=tweets.account_pk
 
     @classmethod
     def select_one(cls, where_clause="", values=tuple()):
@@ -144,6 +135,7 @@ class ORM:
             SQLPATTERN = "SELECT * FROM {table} {where_clause}"
             SQL = SQLPATTERN.format(table=cls.table, where_clause=where_clause)
             cur.execute(SQL, values)
+            conn.commit()
             row = cur.fetchone()
             
             if row is None:
@@ -154,5 +146,4 @@ class ORM:
     def from_pk(cls, pk):
         """ grab the row with the given pk """
         return cls.select_one("WHERE pk = ?", (pk, ))
-    
-    
+       

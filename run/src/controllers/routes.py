@@ -1,11 +1,11 @@
 from flask import jsonify, request, render_template, url_for, redirect, session
+from requests.exceptions import ConnectionError
+from datetime import datetime
+
+from src import app
 from .util import hash_pass
 from .account import Account
-from .tweet import Tweet
-from src import app
-from datetime import datetime 
-
-from requests.exceptions import ConnectionError
+from .tweet import Tweet, make_tweet, get_tweets_for_user, get_tweet, retweet, like
 
 UNAUTHORIZED = {"error": "unauthorized", "status_code": 401}
 NOT_FOUND = {"error": "not found", "status_code": 404}
@@ -32,8 +32,8 @@ def login():
         if account == None:
             alltweets = Tweet.select_all_tweets()
             return render_template('login.html', error="You've entered an invalid email/password combination.  Please try again or signup to create a new account.", alltweets=alltweets)
-        usertweets = account.get_tweets(account.pk)
-        return render_template('dashboard.html', username=session['username'], alltweets=usertweets)
+        usertweets = get_tweets_for_user(account.pk)
+        return render_template('dashboard.html', username=session['username'], alltweets=usertweets, buttontype1="default", buttontype2="primary")
     
     else:
         return render_template('login.html', error="Something went wrong.  Please try logging in again or creating a new account")
@@ -57,28 +57,44 @@ def signup():
             return render_template('signup.html', error2="The passwords you've entered do not match or you already have an account or you didn't fill out the form correctly.  Please try again.")
         else:
             session['username'] = request.form['email_signup']
-            user = hash_pass(request.form['password_signup'])
-            session['password'] = user
+            session['password'] = request.form['password_signup']
             account = Account()
             account.username = session['username']
-            account.password_hash = session['password']
+            account.password_hash = hash_pass(session['password'])
             account.save()
-            usertweets = account.get_tweets(account.pk)
-            return render_template('dashboard.html', username=session['username'], alltweets=usertweets)
+            usertweets = get_tweets_for_user(account.pk)
+            return render_template('dashboard.html', username=session['username'], alltweets=usertweets, buttontype1="default", buttontype2="primary")
 
 @app.route('/dashboard', methods=['GET', 'POST'])
 def dashboard():
     if request.method == 'GET':
         account = Account.verify(session['username'], session['password'])
-        usertweets = account.get_tweets(account.pk)
-        return render_template('dashboard.html', username=session['username'], alltweets=usertweets)
+        usertweets = get_tweets_for_user(account.pk)
+        return render_template('dashboard.html', username=session['username'], alltweets=usertweets, buttontype1="secondary", buttontype2="default")
     if request.method == 'POST':
         account = Account.verify(session['username'], session['password'])
-        if request.form['new_tweet'] != None:
-            account.make_tweet(request.form['new_tweet'])
-            usertweets = account.get_tweets(account.pk)
-            return render_template('dashboard.html', username=session['username'], alltweets=usertweets)
-
+        if request.form.get("new_tweet") != None:
+            make_tweet(account.pk, request.form['new_tweet'])
+            usertweets = get_tweets_for_user(account.pk)
+            return render_template('dashboard.html', username=session['username'], alltweets=usertweets, buttontype1="default", buttontype2="primary")
+        elif request.form.get("all_users"):
+            usertweets = Tweet.select_all_tweets()
+            return render_template('dashboard.html', username=session['username'], alltweets=usertweets, buttontype1="primary", buttontype2="default")
+        elif request.form.get("my_users"):
+            alltweets = get_tweets_for_user(account.pk)
+            return render_template('dashboard.html', username=session['username'], alltweets=alltweets, buttontype1="default", buttontype2="primary")
+        elif request.form.get("retweet"):
+            retweet_pk = request.form['retweet']
+            retweet(retweet_pk)
+            alltweets = get_tweets_for_user(account.pk)
+            return render_template('dashboard.html', username=session['username'], alltweets=alltweets, buttontype1="default", buttontype2="primary")
+        elif request.form.get("like"):
+            like_pk = request.form['like']
+            like(like_pk)
+            alltweets = get_tweets_for_user(account.pk)
+            return render_template('dashboard.html', username=session['username'], alltweets=alltweets, buttontype1="default", buttontype2="primary")
+        else:
+            return redirect(url_for('login'))
 
 @app.route('/logout')
 def logout():
