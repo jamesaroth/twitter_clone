@@ -1,4 +1,4 @@
 from .orm import ORM
-from .tweet import Tweet
+from .post import Post
 # from .hashtag import Hashtag
 from .util import hash_pass

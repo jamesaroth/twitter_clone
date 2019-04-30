@@ -5,23 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 </head>
 
-<h1>Welcome to Fake Twitter!</h1>
+<h1>Welcome to THE Fake Instagram!</h1>
 <h2>You are logged in via the email: {{username}}</h2>
 
 
 <nav class="navbar navbar-light bg-light">
   <form action='/dashboard' method="post" class="form-inline">
-    <input name="new_tweet" class="form-control mr-sm-10" type="text" placeholder="Speak yo mind here" aria-label="Tweet your latest thoughts">
-    <button class="btn btn-primary" type="submit">Send that Tweet</button>
+    <input name="new_post" class="form-control mr-sm-10" type="text" placeholder="Post yo caption here" aria-label="Post your latest image">
+    <button class="btn btn-primary" type="submit">Post that joy</button>
   </form>
   
   <div class="float-right">
     <div class="btn-group" role="group" aria-label="Basic example">
     <form action="/dashboard" method="post" class="form-inline"> 
-    <button type="submit" name="which_users" value="all_tweets" class="btn btn-{{buttontype1}}">All Tweets</button>
+    <button type="submit" name="which_users" value="all_posts" class="btn btn-{{buttontype1}}">All Posts</button>
     </form>
     </form>
-    <button type="submit" name="which_users" value="your_tweets" class="btn btn-{{buttontype2}}">Your Tweets</button>
+    <button type="submit" name="which_users" value="your_posts" class="btn btn-{{buttontype2}}">Your Posts</button>
     </form>
     </div>
   </div>
@@ -33,17 +33,19 @@
     <table class="table table-striped" id="owned_stock_table">
       <thead class="thead-dark">
         <tr>
+          <th>Post</th>
+          <th>Caption</th>
           <th>User</th>
-          <th>Tweets</th>
-          <th>Tweet Time</th>
+          <th>Post Time</th>
         </tr>
       </thead>
       <tbody>
-        {% for tweet in alltweets %}
+        {% for post in allposts %}
         <tr>
-          <td>{{ tweet.username }}</td>
-          <td>{{ tweet.tweet_text }}</td>
-          <td>{{ tweet.time }}</td>
+          <td><img src="{{url_for('image', filename=post.picture)}}" class="img-fluid img-thumbnail"></td>
+          <td>{{ post.post_text }}</td>
+          <td>{{ post.username }}</td>
+          <td>{{ post.time }}</td>
         </tr>
         {% endfor %}
       </tbody>

@@ -9,7 +9,7 @@ class ORM:
     table = "example"
 
     # name of the database
-    database = os.path.join(os.path.dirname(__file__), 'twitterproj.db')
+    database = os.path.join(os.path.dirname(__file__), 'insta.db')
 
     def __init__(self):
         """ initialize properties for each column in the table """
@@ -108,7 +108,7 @@ class ORM:
             return result
 
     @classmethod
-    def select_all_tweets(cls):
+    def select_all_posts(cls):
         """ provide a WHERE clause to a SELECT statement and return objects
         representing each matched row """
         with sqlite3.connect(cls.database) as conn:
@@ -123,7 +123,7 @@ class ORM:
                 result.append(cls._from_row(row))
             return result
 
-# SELECT accounts.username, tweets.tweet_text, tweets.time FROM tweets INNER JOIN accounts ON accounts.pk=tweets.account_pk
+# SELECT accounts.username, posts.post_text, posts.time FROM posts INNER JOIN accounts ON accounts.pk=posts.account_pk
 
     @classmethod
     def select_one(cls, where_clause="", values=tuple()):

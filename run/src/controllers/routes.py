@@ -1,16 +1,24 @@
-from flask import jsonify, request, render_template, url_for, redirect, session
-from requests.exceptions import ConnectionError
+import os
 from datetime import datetime
+
+
+from flask import jsonify, request, render_template, url_for, redirect, session, send_from_directory
+from requests.exceptions import ConnectionError
+
 
 from src import app
 from .util import hash_pass
 from .account import Account
-from .tweet import Tweet, make_tweet, get_tweets_for_user, get_tweet, retweet, like
+from .post import Post, make_post, get_posts_for_user, get_post, repost, like
+
+IMAGE_UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), "..", 'templates', 'static', 'img')
+app.config['UPLOAD_FOLDER'] = IMAGE_UPLOAD_FOLDER
 
 UNAUTHORIZED = {"error": "unauthorized", "status_code": 401}
 NOT_FOUND = {"error": "not found", "status_code": 404}
 APP_ERROR = {"error": "application error", "status_code": 500}
 BAD_REQUEST = {"error": "bad request", "status_code": 400}
+
 
 @app.errorhandler(404)
 def error404(e):
@@ -23,17 +31,17 @@ def error500(e):
 @app.route('/', methods=['GET', 'POST'])
 def login():
     if request.method == 'GET':
-        alltweets = Tweet.select_all_tweets()
-        return render_template('login.html', alltweets=alltweets)
+        allposts = Post.select_all_posts()
+        return render_template('login.html', allposts=allposts)
     elif request.method == 'POST':
         session['username'] = request.form['email_login']
         session['password'] = request.form['password_login']
         account = Account.verify(session['username'], session['password'])
         if account == None:
-            alltweets = Tweet.select_all_tweets()
-            return render_template('login.html', error="You've entered an invalid email/password combination.  Please try again or signup to create a new account.", alltweets=alltweets)
-        usertweets = get_tweets_for_user(account.pk)
-        return render_template('dashboard.html', username=session['username'], alltweets=usertweets, buttontype1="default", buttontype2="primary")
+            allposts = Post.select_all_posts()
+            return render_template('login.html', error="You've entered an invalid email/password combination.  Please try again or signup to create a new account.", allposts=allposts)
+        userposts = get_posts_for_user(account.pk)
+        return render_template('dashboard.html', username=session['username'], allposts=userposts, buttontype1="default", buttontype2="primary")
     
     else:
         return render_template('login.html', error="Something went wrong.  Please try logging in again or creating a new account")
@@ -62,37 +70,39 @@ def signup():
             account.username = session['username']
             account.password_hash = hash_pass(session['password'])
             account.save()
-            usertweets = get_tweets_for_user(account.pk)
-            return render_template('dashboard.html', username=session['username'], alltweets=usertweets, buttontype1="default", buttontype2="primary")
+            userposts = get_posts_for_user(account.pk)
+            return render_template('dashboard.html', username=session['username'], allposts=userposts, buttontype1="default", buttontype2="primary")
 
 @app.route('/dashboard', methods=['GET', 'POST'])
 def dashboard():
     if request.method == 'GET':
         account = Account.verify(session['username'], session['password'])
-        usertweets = get_tweets_for_user(account.pk)
-        return render_template('dashboard.html', username=session['username'], alltweets=usertweets, buttontype1="secondary", buttontype2="default")
+        userposts = get_posts_for_user(account.pk)
+        return render_template('dashboard.html', username=session['username'], allposts=userposts, buttontype1="secondary", buttontype2="default")
     if request.method == 'POST':
         account = Account.verify(session['username'], session['password'])
-        if request.form.get("new_tweet") != None:
-            make_tweet(account.pk, request.form['new_tweet'])
-            usertweets = get_tweets_for_user(account.pk)
-            return render_template('dashboard.html', username=session['username'], alltweets=usertweets, buttontype1="default", buttontype2="primary")
+        if request.form.get("new_post") != None and "imageFile" in request.files:
+            f = request.files['imageFile']
+            f.save(os.path.join(IMAGE_UPLOAD_FOLDER, f.filename))
+            make_post(account.pk, request.form['new_post'], f.filename)
+            userposts = get_posts_for_user(account.pk)
+            return render_template('dashboard.html', username=session['username'], allposts=userposts, buttontype1="default", buttontype2="primary")
         elif request.form.get("all_users"):
-            usertweets = Tweet.select_all_tweets()
-            return render_template('dashboard.html', username=session['username'], alltweets=usertweets, buttontype1="primary", buttontype2="default")
+            userposts = Post.select_all_posts()
+            return render_template('dashboard.html', username=session['username'], allposts=userposts, buttontype1="primary", buttontype2="default")
         elif request.form.get("my_users"):
-            alltweets = get_tweets_for_user(account.pk)
-            return render_template('dashboard.html', username=session['username'], alltweets=alltweets, buttontype1="default", buttontype2="primary")
-        elif request.form.get("retweet"):
-            retweet_pk = request.form['retweet']
-            retweet(retweet_pk)
-            alltweets = get_tweets_for_user(account.pk)
-            return render_template('dashboard.html', username=session['username'], alltweets=alltweets, buttontype1="default", buttontype2="primary")
+            allposts = get_posts_for_user(account.pk)
+            return render_template('dashboard.html', username=session['username'], allposts=allposts, buttontype1="default", buttontype2="primary")
+        elif request.form.get("repost"):
+            repost_pk = request.form['repost']
+            repost(repost_pk)
+            allposts = get_posts_for_user(account.pk)
+            return render_template('dashboard.html', username=session['username'], allposts=allposts, buttontype1="default", buttontype2="primary")
         elif request.form.get("like"):
             like_pk = request.form['like']
             like(like_pk)
-            alltweets = get_tweets_for_user(account.pk)
-            return render_template('dashboard.html', username=session['username'], alltweets=alltweets, buttontype1="default", buttontype2="primary")
+            allposts = get_posts_for_user(account.pk)
+            return render_template('dashboard.html', username=session['username'], allposts=allposts, buttontype1="default", buttontype2="primary")
         else:
             return redirect(url_for('login'))
 
@@ -102,6 +112,12 @@ def logout():
    session.pop('username', None)
    session.pop('password', None)
    return redirect(url_for('login'))
+
+@app.route('/img/<filename>')
+def image(filename):
+    return send_from_directory(IMAGE_UPLOAD_FOLDER, filename)
+
+
 
 def convertTime(time):
     return datetime.utcfromtimestamp(time).strftime('%Y-%m-%d %H:%M:%S')

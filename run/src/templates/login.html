@@ -9,7 +9,7 @@
 <div class="col">
 <div class="row">
 <div class="col-12">
-<h1>Welcome to Fake Twitter!</h1>
+<h1>Welcome to Fake Instagram!</h1>
 </div>
 </div>
 </div>
@@ -41,17 +41,19 @@
     <table class="table table-striped" id="owned_stock_table">
       <thead class='thead-dark'>
         <tr>
+          <th>Post</th>
+          <th>Caption</th>
           <th>User</th>
-          <th>Tweet</th>
-          <th>Tweet Time</th>
+          <th>Post Time</th>
         </tr>
       </thead>
       <tbody>
-        {% for tweet in alltweets %}
+        {% for post in allposts %}
         <tr>
-          <td>{{ tweet.username }}</td>
-          <td>{{ tweet.tweet_text }}</td>
-          <td>{{ tweet.time }}</td>
+          <td><img src="{{url_for('image', filename=post.picture)}}" class="img-fluid img-thumbnail"></td>
+          <td>{{ post.post_text }}</td>
+          <td>{{ post.username }}</td>
+          <td>{{ post.time }}</td>
         </tr>
         {% endfor %}
       </tbody>

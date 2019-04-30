@@ -2,8 +2,9 @@ import os
 from pathlib import Path
 import sqlite3
 
-p = Path(__file__).parents[1]
-DBFILENAME = os.path.join(p, 'run', 'src', 'controllers', 'twitterproj.db')
+p1 = Path(__file__).resolve()
+p = p1.parents[1]
+DBFILENAME = os.path.join(p, 'run', 'src', 'controllers', 'insta.db')
 
 def create_db(dbfilename=DBFILENAME):
     with sqlite3.connect(dbfilename) as conn:
@@ -20,47 +21,36 @@ def create_db(dbfilename=DBFILENAME):
         ); """
         cur.execute(SQL)
 
-        SQL = """ DROP TABLE IF EXISTS tweets; """
+        SQL = """ DROP TABLE IF EXISTS posts; """
         cur.execute(SQL)
 
         SQL = """
-        CREATE TABLE tweets (
+        CREATE TABLE posts (
             pk INTEGER PRIMARY KEY AUTOINCREMENT,
             account_pk INTEGER,
-            username VARCHAR(280), 
-            tweet_text VARCHAR(280),
+            username VARCHAR(280),
+            picture BLOB,
+            post_text VARCHAR(280),
             time FLOAT,
-            retweet_count INTEGER,
+            repost_count INTEGER,
             likes INTEGER,
             FOREIGN KEY(account_pk) REFERENCES accounts(pk),
             FOREIGN KEY(username) REFERENCES accounts(username)
         ); """
         cur.execute(SQL)
 
-        SQL = """ DROP TABLE IF EXISTS hashtags; """
-        cur.execute(SQL)
+        # SQL = """ DROP TABLE IF EXISTS hashtags; """
+        # cur.execute(SQL)
 
-        SQL = """
-        CREATE TABLE hashtags (
-        pk INTEGER PRIMARY KEY AUTOINCREMENT,
-        tweet_pk INTEGER,
-        tag VARCHAR(280),
-        FOREIGN KEY(tweet_pk) REFERENCES tweets(pk)
-        ); """
-        cur.execute(SQL)
+        # SQL = """
+        # CREATE TABLE hashtags (
+        # pk INTEGER PRIMARY KEY AUTOINCREMENT,
+        # tweet_pk INTEGER,
+        # tag VARCHAR(280),
+        # FOREIGN KEY(tweet_pk) REFERENCES tweets(pk)
+        # ); """
+        # cur.execute(SQL)
         
-        SQL = """ DROP TABLE IF EXISTS tweets_hashtags; """
-        cur.execute(SQL)
-
-        SQL = """
-        CREATE TABLE tweets_hashtags (
-        pk INTEGER PRIMARY KEY AUTOINCREMENT,
-        tweet_pk INTEGER,
-        hashtag_pk INTEGER,
-        FOREIGN KEY(tweet_pk) REFERENCES tweets(pk), 
-        FOREIGN KEY(hashtag_pk) REFERENCES hashtags(pk)
-        ); """
-        cur.execute(SQL)
 
 if __name__ == "__main__":
     create_db(DBFILENAME)
